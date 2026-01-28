@@ -17,8 +17,13 @@ public class UIDemo : MonoBehaviour
 		}	
 	}
 
-	void ChangeColor()
+	public void ChangeColor()
 	{
 		spriteRenderer.color = Random.ColorHSV();
+	}
+
+	public void SetSize(float size)
+	{
+		transform.localScale = Vector2.one * size;
 	}
 }
