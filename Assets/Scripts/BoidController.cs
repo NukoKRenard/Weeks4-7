@@ -4,6 +4,7 @@ using System.Collections.Generic;
 public class BoidController : MonoBehaviour
 {
     public float boidSpeed = 5.0f;
+    public float moveAwayDistance = 1.0f;
     public GameObject prefab;
     public List<Boid> boids;
 
@@ -15,17 +16,17 @@ public class BoidController : MonoBehaviour
 
     void Update()
     {
-	    CreateBoid();
+	    Debug.Log(Mathf.Atan2(transform.up.x,transform.up.y));
     }
 
-    void CreateBoid() 
+    public void CreateBoid() 
     {
 	    Boid boid = Instantiate(prefab,transform).GetComponent<Boid>();
 
 	    boids.Add(boid);
 	    boid.boids = boids;
 	    boid.speed = boidSpeed;
-
+	    boid.collisionDistance = moveAwayDistance;
     }
 
 }
