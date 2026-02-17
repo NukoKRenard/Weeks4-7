@@ -96,6 +96,16 @@ public class Boid : MonoBehaviour
        transform.localEulerAngles += new Vector3(0,0,Random.Range(-directional_noise,directional_noise));
        transform.position += transform.up*Time.deltaTime*speed;
 
+       Vector2 mousePos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+       if (Mouse.current.leftButton.isPressed)
+       {
+	      HeadTowards(mousePos); 
+       }
+       else if (Mouse.current.leftButton.isPressed)
+       {
+	      HeadAway(mousePos); 
+       }
+
     }
 
     //Turn the boid to head away from a specific point.
