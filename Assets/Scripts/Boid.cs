@@ -13,6 +13,7 @@ public class Boid : MonoBehaviour
     public float lifetime;
     void Start()
     {
+	//If the slider is set to negative one the boids will live forever, this just ensures that DeltaTime would never accidentally make a boid immortal (In cases of large lag)
         myScript = GetComponent<Boid>();
         if (lifetime == -1)
 	{
@@ -21,38 +22,46 @@ public class Boid : MonoBehaviour
     }
     void Update()
     {
+	//Lifetime timer code
+	//If the lifetime has expired, delete the boid.
 	if (lifetime < 0 && lifetime > -100)
 	{
 		boids.Remove(myScript);
 		Destroy(gameObject);
 	}
 	lifetime -= Time.deltaTime;
+	
+	
 	bool will_collide = false;
+	Vector2 collisionsCenter = new Vector2(0,0);
+	int collisionsCount = 0;
+	
+	//The average heading on the flock, weighted by each boids distance.
+	Vector2 flockPosition = new Vector2(0,0);
 
-       Vector2 collisionsCenter = new Vector2(0,0);
-       int collisionsCount = 0;
+	//The average heading of the flock, weighted by each boid's distance.
+	Vector2 flockHeading = new Vector2(0,0);
 
-       Vector2 flockPosition = new Vector2(0,0);
-       Vector2 flockHeading = new Vector2(0,0);
-
-       Vector2 screen_size = Camera.main.ScreenToWorldPoint(new Vector2(Screen.width,Screen.height));
-       foreach (Boid boid in boids)
+	//Screen size
+	Vector2 screen_size = Camera.main.ScreenToWorldPoint(new Vector2(Screen.width,Screen.height));
+	foreach (Boid boid in boids)
        {
-
+	       //If we compare against ourselves our equasions divide by zero, and we don't want that.
 	       if (boid != myScript)
 	       {
+		       //The direction to the boid
 		       Vector2 direction = boid.transform.position-transform.position;
+		       //The distance to the boid.
 		       float distance = direction.magnitude;
 	      
 		       //Adds to the average flock position, weighted inversely by the boid's distance.
 		       //The weight also has to take into account the portal effect on each side of the screen
-
+		       //Adds the boids position to the average position of the flock, weighted inversely by it's distance.
 		       flockPosition += (Vector2)(direction/boids.Count)*DistanceFalloff(boid,screen_size); 
+		       //Adds teh boids direction to the average direction of the flock, weighted inversely by it's distance.
 		       flockHeading += (Vector2)(boid.transform.up/boids.Count)*DistanceFalloff(boid,screen_size);
 			       
-					
-	       
-
+		   //If the boid is about to collide with another boid it adds that boid position to an average in order to veer away from.
 		   if (distance < collisionDistance)
 		   {
 			   collisionsCount++;
@@ -63,6 +72,7 @@ public class Boid : MonoBehaviour
        }
        collisionsCenter/=collisionsCount;
        collisionsCenter = collisionsCenter.normalized;
+       //The next few branching statements detect if a boid is outside of the bounds of the map, and is heading outside of the map.
        if (transform.position.y < -screen_size.y && transform.up.y < 0)
        {
 	       transform.position = new Vector2(transform.position.x,screen_size.y);
@@ -82,25 +92,32 @@ public class Boid : MonoBehaviour
 
 
 	       
-       
+       //If the boid is about to colide with another, then that takes priority, and the boid will veer away.
        if (will_collide)
        {
 	       HeadAway(collisionsCenter);
        }
+       //Otherwise it moves with the rest of the flock.
        else 
        {
 	       HeadTowards(flockPosition);
 	       HeadTowards(flockHeading);
        }
 
+       //Injects some noise into the boids direction.
        transform.localEulerAngles += new Vector3(0,0,Random.Range(-directional_noise,directional_noise));
+
+       //Moves the boid forwards by a speed value.
        transform.position += transform.up*Time.deltaTime*speed;
 
+       //Mouse interaction
        Vector2 mousePos = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+       //If the mouse left mouse button is clicked, the boids should move towards the mouse.
        if (Mouse.current.leftButton.isPressed)
        {
 	      HeadTowards(mousePos); 
        }
+       //If the right mouse button is clicked, the boids should move away from the mouse.
        else if (Mouse.current.leftButton.isPressed)
        {
 	      HeadAway(mousePos); 
@@ -123,6 +140,8 @@ public class Boid : MonoBehaviour
 	    transform.localEulerAngles += new Vector3(0,0,-headingangle*1000)*Time.deltaTime;
     }
 
+    //Gets how to turn in order to head towards a specific point.
+    //(This was the hardest part, I would have used matrix or quaternion  math, however I was unsure if I was allowed, so I just used sine and cosine)
     float getTurnDirection(Vector2 target, Vector2 angle)
     {
 	    angle = angle.normalized;
