@@ -60,6 +60,7 @@ public class Boid : MonoBehaviour
 		   //If the boid is about to collide with another boid it adds that boid position to an average in order to veer away from.
 		   if (distance < collisionDistance)
 		   {
+			   Debug.Log("Distance: "+distance + "Same: " + (boid == myScript));
 			   collisionsCount++;
 			   collisionsCenter += direction;
 			   will_collide = true;
@@ -69,6 +70,7 @@ public class Boid : MonoBehaviour
        collisionsCenter/=collisionsCount;
        if (!will_collide)
        {
+	       Debug.Log(collisionsCount);
        }
        collisionsCenter = collisionsCenter.normalized;
        //The next few branching statements detect if a boid is outside of the bounds of the map, and is heading outside of the map.
@@ -99,6 +101,7 @@ public class Boid : MonoBehaviour
        //Otherwise it moves with the rest of the flock.
        else 
        {
+	       Debug.Log("Moving...");
 	       HeadTowards(flockPosition);
 	       HeadTowards(flockHeading);
 	       
